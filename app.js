@@ -1,7 +1,7 @@
 const express = require("express");
 const multer  = require("multer");
 
-const mainRouter = require("./routers/mainRouter.js");
+const groceryRouter = require("./routers/groceryListRouter.js");
 
 global.__approot = __dirname;
 
@@ -21,6 +21,6 @@ app.use("/public/", express.static(__dirname + '/public/'));
 
 app.use(express.json())
 
-app.use("", mainRouter);
+app.use("/groceryList", groceryRouter);
 
 app.listen(3000);
