@@ -2,6 +2,7 @@ const express = require("express");
 const multer  = require("multer");
 
 const groceryRouter = require("./routers/groceryListRouter.js");
+const authRouter = require("./routers/authRouter.js");
 
 global.__approot = __dirname;
 
@@ -22,5 +23,6 @@ app.use("/public/", express.static(__dirname + '/public/'));
 app.use(express.json())
 
 app.use("/groceryList", groceryRouter);
+app.use("/auth", authRouter);
 
 app.listen(3000);
