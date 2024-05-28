@@ -3,6 +3,7 @@ const multer  = require("multer");
 
 const groceryRouter = require("./routers/groceryListRouter.js");
 const authRouter = require("./routers/authRouter.js");
+const fridgeRouter = require("./routers/fridgeRouter.js");
 
 global.__approot = __dirname;
 
@@ -24,5 +25,6 @@ app.use(express.json())
 
 app.use("/groceryList", groceryRouter);
 app.use("/auth", authRouter);
+app.use("/fridge", fridgeRouter);
 
 app.listen(3000);
