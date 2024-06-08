@@ -9,14 +9,14 @@ function getConfig() {
     return dotenv.config({ path: __approot + '/.env' });
 }
 
-function getEmailOptions(email, code) {
+function getEmailOptions(email) {
     let config = getConfig();
 
     return {
         from: config.parsed.EMAIL,
         to: email,
         subject: 'Код для проверки',
-        text: `Ваш код для проверки: ${code}`
+        text: ""
     };
 }
 
@@ -51,18 +51,22 @@ exports.sendVerificationCode = (req, res) => {
     console.log(code);
 
     let transporter = getTransporter();
-    let options = getEmailOptions(email, code);
+    let options = getEmailOptions(email);
 
+    options['text'] = `Ваш код для проверки: ${code}`;
 
     verificationCodes.set(email, code);
+
 
     transporter.sendMail(options, function(error, info) {
         if (error) {
             console.log(error);
+            res.status(505).send();
             return;
         }
         console.log('Message sent');
         transporter.close();
+        res.status(200).send();
     });
 }
 
@@ -86,7 +90,7 @@ exports.checkCode = (req, res) => {
         db.connect();
 
         db.query(checkQuery, [email], (err, rows, fields) => {
-            if(rows != undefined && rows.length == 0) {
+            if(rows == undefined || rows.length == 0) {
                 db.query(familyQuery, (err, rows, fields) => {
                     familyId = rows[0].id;
         
@@ -112,4 +116,56 @@ exports.checkCode = (req, res) => {
     } else {
         res.json(verified);
     }
+}
+
+
+exports.sendInvataionToFamily = (req, res) => {
+    const email = req.query.email;
+    const familyId = req.query.familyId;
+
+    let transporter = getTransporter();
+    let options = getEmailOptions(email);
+
+
+    options['text'] = `Для вступления в семью нажмите на ссылку http://192.168.56.58:3000/auth/family/invite/accept?email=${email}&familyId=${familyId}`;
+
+
+    transporter.sendMail(options, function(error, info) {
+        if (error) {
+            console.log(error);
+            return;
+        }
+        console.log('Message sent');
+        transporter.close();
+    });
+}
+
+
+exports.addToFamily = (req, res) => {
+    let db = getDb();
+    let email = req.query.email;
+    let familyId = req.query.familyId;
+    let insertQuery = "INSERT INTO Users (user_email, family_id) VALUES (?, ?)";
+    let updateQuery = "UPDATE Users SET family_id = ? WHERE email = ?"
+    let checkQuery = "SELECT * FROM USERS WHERE email = ?";
+
+    console.log(`${email}   ${familyId}`)
+
+    db.connect();
+
+    db.query(checkQuery, [email], (err, rows, fields) => {
+
+        if(rows == undefined || rows.length == 0) {
+            db.query(insertQuery, [email, familyId], (err, rows, fields) => {
+                res.status(200).sendFile(`${__approot}/public/html/notification.html`);
+                db.end();
+            });
+        } else {
+            db.query(updateQuery, [familyId, email], (err, rows, fields) => {
+                res.status(200).sendFile(`${__approot}/public/html/notification.html`);
+                db.end();
+            })
+        }
+
+    });
 }

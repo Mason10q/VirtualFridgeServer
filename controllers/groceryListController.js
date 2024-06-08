@@ -77,6 +77,7 @@ exports.addGroceryList = (req, res) => {
     db.connect();
 
     db.query(query, [req.query.family_id, req.query.name], (err, rows, fields) => {
+        console.log(err);
         res.send();   
     });
 
@@ -129,7 +130,7 @@ exports.incrementGroceryAmount = (req, res) => {
     
     db.connect();
 
-    db.query(query, [req.query.groceryListId, req.query.productId], (err, rows, fields) => {
+    db.query(query, [req.query.listId, req.query.productId], (err, rows, fields) => {
         res.send();   
     });
 
@@ -142,7 +143,7 @@ exports.decrementGroceryAmount = (req, res) => {
     
     db.connect();
 
-    db.query(query, [req.query.groceryListId, req.query.productId], (err, rows, fields) => {
+    db.query(query, [req.query.listId, req.query.productId], (err, rows, fields) => {
         res.send();   
     });
 
@@ -163,6 +164,8 @@ exports.searchProduct = (req, res) => {
 
     db.query(query, [listId, `${req.query.query}%`, limit, offset], (err, rows, fields) => {
         if(rows === undefined) { console.log(err); return;}
+
+        console.log(listId);
 
         res.json(rows);   
     });
